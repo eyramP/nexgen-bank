@@ -22,11 +22,14 @@ services:
       - ./backend/app/logs:/src/backend/app/logs
     ports:
       - "8000:8000"
+
     env_file:
       - ./.envs/.env.local
     depends_on:
       - postgres
       - mailpit
+      - redis
+      - rabbitmq
     command: /start.sh
     networks:
       - nexgen_local_nw
@@ -36,6 +39,9 @@ services:
       - "traefik.http.routers.api.rule=Host(`api.localhost`)"
       - "traefik.http.routers.api.service=api-service"
       - "traefik.http.services.api-service.loadbalancer.server.port=8000"
+      - "traefik.http.services.api-service.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.api-service.loadbalancer.healthcheck.interval=30s"
+      - "traefik.http.services.api-service.loadbalancer.healthcheck.timeout=5s"
 
   mailpit:
     image: docker.io/axllent/mailpit:v1.20.3
@@ -47,7 +53,7 @@ services:
     environment:
       MP_MAX_MESSAGES: 5000
       MP_DATA_FILE: /data/mailpit.db
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ACCPEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
     networks:
       - nexgen_local_nw
@@ -65,6 +71,55 @@ services:
     networks:
       - nexgen_local_nw
 
+  redis:
+    image: docker.io/redis:7.0-alpine
+    command: redis-server --appendonly yes
+    networks:
+      - nexgen_local_nw
+
+  rabbitmq:
+    image: docker.io/rabbitmq:3.13-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - nexgen_rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - nexgen_local_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rabbitmq.entrypoints=web"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
+      - "traefik.http.routers.rabbitmq.service=rabbitmq-service"
+      - "traefik.http.services.rabbitmq-service.loadbalancer.server.port=15672"
+
+  celeryworker:
+    <<: *api
+    ports: []
+    command: /start-celeryworker.sh
+
+  flower:
+    <<: *api
+    ports:
+      - "5555:5555"
+    volumes:
+      - nexgen_flower_data:/data
+    command: /start-flower.sh
+    depends_on:
+      - redis
+      - rabbitmq
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.entrypoints=web"
+      - "traefik.http.routers.flower.rule=Host(`flower.localhost`)"
+      - "traefik.http.routers.flower.service=flower-service"
+      - "traefik.http.services.flower-service.loadbalancer.server.port=5555"
+
+  celerybeat:
+    <<: *api
+    ports: []
+    command: /start-celerybeat.sh
+
 networks:
   nexgen_local_nw:
     external: true
@@ -72,3 +127,5 @@ networks:
 volumes:
   nexgen_local_db:
   nexgen_mailpit_data:
+  nexgen_flower_data:
+  nexgen_rabbitmq_data:
