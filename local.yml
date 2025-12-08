@@ -129,3 +129,4 @@ volumes:
   nexgen_mailpit_data:
   nexgen_flower_data:
   nexgen_rabbitmq_data:
+  nexgen_mlflow_data:
