@@ -43,5 +43,5 @@ class User(BaseUserSchema, table=True):
         full_name = f"{self.first_name} {self.middle_name + ' ' if self.middle_name else '' } {self.last_failed_login}"
         return full_name.title().strip()
 
-    def has_tole(self, role, RoleChoicesSchema) -> bool:
+    def has_role(self, role: RoleChoicesSchema) -> bool:
         return self.role.value == role.value
