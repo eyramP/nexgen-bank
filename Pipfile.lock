@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6df06471d8ff3ceb52c27a50706586aa20c892cf5ff1870860cc96aeddccf8a9"
+            "sha256": "580cd14059f479937d254198ca1d4c4338234dde27f328e7d8d90621e05394a5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -27,12 +27,12 @@
         },
         "alembic": {
             "hashes": [
-                "sha256:99bd884ca390466db5e27ffccff1d179ec5c05c965cfefc0607e69f9e411cb25",
-                "sha256:b00892b53b3642d0b8dbedba234dbf1924b69be83a9a769d5a624b01094e304b"
+                "sha256:bbe9751705c5e0f14877f02d46c53d10885e377e3d90eda810a016f9baa19e8e",
+                "sha256:f483dd1fe93f6c5d49217055e4d15b905b425b6af906746abb35b69c1996c4e6"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.8'",
-            "version": "==1.14.0"
+            "markers": "python_version >= '3.10'",
+            "version": "==1.17.2"
         },
         "amqp": {
             "hashes": [
